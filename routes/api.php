@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/health', fn () => response()->json(['ok' => true]));
+
 Route::prefix('approve')->group(function () {
     // Health check
     Route::get('/', [ApproveIntegrationController::class, 'index']);
