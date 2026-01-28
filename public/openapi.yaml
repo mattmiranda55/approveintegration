@@ -1,0 +1,330 @@
+openapi: 3.0.3
+info:
+  title: APPROVE Integration Tool API
+  description: |
+    API for detecting CSS selectors on eCommerce pages for APPROVE payments integration.
+    
+    This tool analyzes product, cart, and gallery pages to identify the appropriate
+    CSS selectors needed for integrating APPROVE payment buttons and functionality.
+  version: 1.0.0
+  contact:
+    name: APPROVE Payments
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /api/approve/:
+    get:
+      summary: Health check
+      description: Returns the status of the API service.
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: approve-integration-tool
+
+  /api/approve/analyze:
+    post:
+      summary: Analyze multiple pages
+      description: |
+        Analyze product, cart, and optionally gallery pages for APPROVE integration selectors.
+        Returns the best matching CSS selectors for each page type.
+      operationId: analyzePages
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+            example:
+              product_url: "https://example.com/product/widget"
+              cart_url: "https://example.com/cart"
+              gallery_url: "https://example.com/collections/all"
+      responses:
+        '200':
+          description: Analysis results for all provided pages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullAnalysisResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/approve/analyze/product:
+    post:
+      summary: Analyze a product page
+      description: Analyze a single product page for APPROVE integration selectors.
+      operationId: analyzeProductPage
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SinglePageRequest'
+            example:
+              url: "https://example.com/product/widget"
+      responses:
+        '200':
+          description: Product page analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnalysisResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/approve/analyze/cart:
+    post:
+      summary: Analyze a cart page
+      description: Analyze a single cart page for APPROVE integration selectors.
+      operationId: analyzeCartPage
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SinglePageRequest'
+            example:
+              url: "https://example.com/cart"
+      responses:
+        '200':
+          description: Cart page analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnalysisResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/approve/analyze/gallery:
+    post:
+      summary: Analyze a gallery page
+      description: Analyze a single gallery/collection page for APPROVE integration selectors.
+      operationId: analyzeGalleryPage
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SinglePageRequest'
+            example:
+              url: "https://example.com/collections/all"
+      responses:
+        '200':
+          description: Gallery page analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnalysisResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/approve/selectors:
+    get:
+      summary: List selector categories
+      description: List all available selector categories organized by page type.
+      operationId: listSelectors
+      tags:
+        - Selectors
+      responses:
+        '200':
+          description: Selector categories by page type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelectorCategories'
+              example:
+                product:
+                  - wrappers
+                  - model_selectors
+                  - price_selectors
+                  - qty_selectors
+                  - sku_selectors
+                  - insert_after_selectors
+                  - inc_qty_selectors
+                  - dec_qty_selectors
+                  - options_selectors
+                cart:
+                  - urls
+                  - wrappers
+                  - item_selectors
+                  - item_model_selectors
+                  - item_price_selectors
+                  - item_qty_selectors
+                  - insert_after_selectors
+                mini_cart:
+                  - wrappers
+                  - item_selectors
+                  - item_model_selectors
+                  - item_price_selectors
+                gallery:
+                  - wrappers
+                  - item_selectors
+                  - item_model_selectors
+                  - item_price_selectors
+                  - insert_after_selectors
+
+components:
+  schemas:
+    AnalyzeRequest:
+      type: object
+      required:
+        - product_url
+        - cart_url
+      properties:
+        product_url:
+          type: string
+          format: uri
+          description: URL of the product page to analyze
+        cart_url:
+          type: string
+          format: uri
+          description: URL of the cart page to analyze
+        gallery_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Optional URL of the gallery/collection page to analyze
+
+    SinglePageRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the page to analyze
+
+    PageAnalysisResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The URL that was analyzed
+        page_type:
+          type: string
+          enum: [product, cart, gallery]
+          description: The type of page analyzed
+        success:
+          type: boolean
+          description: Whether the analysis was successful
+        error:
+          type: string
+          nullable: true
+          description: Error message if analysis failed
+        selectors:
+          $ref: '#/components/schemas/MatchedSelectors'
+
+    FullAnalysisResponse:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/PageAnalysisResponse'
+        cart:
+          $ref: '#/components/schemas/PageAnalysisResponse'
+        gallery:
+          $ref: '#/components/schemas/PageAnalysisResponse'
+
+    MatchedSelectors:
+      type: object
+      description: |
+        Best matching CSS selector for each category. Keys vary by page type.
+        Value is null if no matching selector was found for that category.
+      additionalProperties:
+        type: string
+        nullable: true
+      example:
+        wrappers: ".product"
+        model_selectors: ".product_title.entry-title"
+        price_selectors: ".woocommerce-Price-amount.amount bdi"
+        qty_selectors: "input[name=\"quantity\"]"
+        sku_selectors: null
+        insert_after_selectors: "form.cart"
+        inc_qty_selectors: null
+        dec_qty_selectors: null
+        options_selectors: "select"
+
+    SelectorCategories:
+      type: object
+      description: Available selector categories organized by page type
+      properties:
+        product:
+          type: array
+          items:
+            type: string
+        cart:
+          type: array
+          items:
+            type: string
+        mini_cart:
+          type: array
+          items:
+            type: string
+        gallery:
+          type: array
+          items:
+            type: string
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Validation errors by field
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Analysis
+    description: Page analysis endpoints for detecting CSS selectors
+  - name: Selectors
+    description: Selector configuration and listing endpoints
