@@ -38,7 +38,7 @@ class ApproveIntegrationController extends Controller
     /**
      * Analyze product, cart, and optionally gallery pages for APPROVE selectors.
      */
-    public function analyze(Request $request): JsonResponse
+    public function analyze(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'urls' => 'required|array',
@@ -56,15 +56,22 @@ class ApproveIntegrationController extends Controller
 
         $response = [];
         $results = null;
+        $has_gallery = false;
 
         foreach ($urls as $url) {
+            if($url->type === UrlTypes::Gallery) { $has_gallery = true; }
             $method = self::TYPES[$url['type']];
             $results = $this->matcher->$method($url['url']);
             $response[] = $this->formatPageResponse($results);
         }
 
-        return response()->json($response);
+        if($has_gallery){
+            $template = parse_product_cart_gallery($response->selectors);
+            return response($template)->header('Content-Type', 'application/javascript');
+        }
 
+        $template = parse_product_cart($response->selectors);
+        return response($template)->header('Content-Type', 'application/javascript');
     }
 
     /**

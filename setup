@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+check_requirements() {
+  if ! command -v herd &> /dev/null; then
+    echo "herd is not installed"
+    exit 1
+  fi
+  
+  if ! command -v composer &> /dev/null; then
+    echo "composer is not installed"
+    exit 1
+  fi
+  
+  if ! command -v php &> /dev/null; then
+    echo "php is not installed"
+    exit 1
+  fi
+  
+  if ! command -v npm &> /dev/null; then
+    echo "npm is not installed"
+    exit 1
+  fi
+  
+}
+
+check_requirements
+
+echo "Initializing herd..."
+herd init
+herd secure
+echo "Done!"
+
+echo "Installing PHP dependencies..."
+composer install
+echo "Done!"
+
+echo "Installing Node dependencies..."
+npm i
+echo "Done!"
+
+echo "Building..."
+npm run build
+echo "Done! Access at https://approveintegration.test"

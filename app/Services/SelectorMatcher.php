@@ -17,7 +17,7 @@ class SelectorMatcher
     {
         $this->scraper = $scraper ?? new HtmlScraper();
         $this->cssConverter = new CssSelectorConverter();
-        $this->selectors = $selectors ?? (function_exists('config') ? config('approve-selectors') : []) ?? [];
+        $this->selectors = config('approve-selectors');
     }
 
     /**

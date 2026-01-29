@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
 const urls = ref<Record<string, string>>({
     product: '',
@@ -8,16 +8,7 @@ const urls = ref<Record<string, string>>({
 });
 const selectedTypes = ref<Set<string>>(new Set());
 const isLoading = ref(false);
-const isAuthenticated = ref(false);
 
-onMounted(() => {
-    const enteredPassword = prompt('Enter password to access this tool:');
-    if (enteredPassword === import.meta.env.VITE_APP_PASSWORD) {
-        isAuthenticated.value = true;
-    } else {
-        alert('Incorrect password');
-    }
-});
 
 function toggleType(type: string) {
     if (selectedTypes.value.has(type)) {
@@ -39,7 +30,7 @@ async function analyzeUrl() {
     results.value = null;
 
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/approve/analyze`, {
+        const response = await fetch(`/api/approve/analyze`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -67,7 +58,7 @@ async function analyzeUrl() {
 </script>
 
 <template>
-    <div v-if="isAuthenticated" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
         <!-- Header -->
         <header class="bg-white dark:bg-gray-800 shadow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -120,13 +111,18 @@ async function analyzeUrl() {
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <div v-for="type in Array.from(selectedTypes)" :key="type">
-                            <label :for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ type.charAt(0).toUpperCase() + type.slice(1) }} Page Url
+                    <div class="flex flex-wrap gap-4">
+                        <div v-for="type in Array.from(selectedTypes)" :key="type" class="w-full md:w-[calc(33.333%-0.75rem)]">
+                            <label :for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ type.charAt(0).toUpperCase() + type.slice(1) }} Page Selectors From Extension
                             </label>
-                            <input :id="type" v-model="urls[type]" type="url" placeholder="https://example.com/product/123"
-                                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2" /><br>
+                            <textarea 
+                                :id="type" 
+                                v-model="urls[type]" 
+                                :placeholder="`{\n  '${type}': {\n    selectors\n  }\n}`"
+                                rows="8"
+                                class="block w-full h-[33vh] rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 resize-none font-mono text-sm"
+                            ></textarea>
                         </div>
                     </div>
                     <button @click="analyzeUrl" :disabled="isLoading || !urls || selectedTypes.size === 0"
@@ -169,8 +165,5 @@ async function analyzeUrl() {
                 </div>
             </div>
         </main>
-    </div>
-    <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p class="text-gray-600 dark:text-gray-400">Access denied. Please refresh and enter the correct password.</p>
     </div>
 </template>

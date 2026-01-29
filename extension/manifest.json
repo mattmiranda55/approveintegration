@@ -1,0 +1,10 @@
+{
+  "name": "APPROVE Integration Scraper",
+  "description": "Extension for scraping ecommerce sites for css selectors for APPROVE integration",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "approve_check.png"
+  }
+}

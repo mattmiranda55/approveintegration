@@ -102,7 +102,7 @@ return [
 
     'cart' => [
         // Cart URL pathnames
-        'urls' => [
+        'url' => [
             '/cart',
             '/cart/',
             '/shopping-cart',
