@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APPROVE Integration Scraper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>APPROVE Scraper</h1>
+    
+    <!-- CMS Detection -->
+    <div class="section">
+      <label class="label">Detected Platform</label>
+      <div id="cms-display" class="cms-badge">Detecting...</div>
+    </div>
+
+    <!-- Page Type Toggle -->
+    <div class="section">
+      <label class="label">Page Type</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-type="product">Product</button>
+        <button class="toggle-btn" data-type="cart">Cart</button>
+        <button class="toggle-btn" data-type="gallery">Gallery</button>
+      </div>
+    </div>
+
+    <!-- Analyze Button -->
+    <button id="analyze-btn" class="primary-btn" disabled>
+      Select a page type
+    </button>
+
+    <!-- Results -->
+    <div id="results-section" class="section hidden">
+      <label class="label">Matched Selectors</label>
+      <textarea id="results" readonly></textarea>
+      <button id="copy-btn" class="secondary-btn">
+        Copy to Clipboard
+      </button>
+      <div id="copy-feedback" class="feedback hidden">Copied!</div>
+    </div>
+
+    <!-- Error -->
+    <div id="error-section" class="section hidden">
+      <div class="error-message" id="error-message"></div>
+    </div>
+  </div>
+
+  <script src="selectors.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
