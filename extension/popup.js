@@ -2,6 +2,7 @@
 let selectedType = null;
 
 // DOM Elements
+const scriptDisplay = document.getElementById('script-display');
 const cmsDisplay = document.getElementById('cms-display');
 const analyzeBtn = document.getElementById('analyze-btn');
 const resultsSection = document.getElementById('results-section');
@@ -15,6 +16,7 @@ const toggleBtns = document.querySelectorAll('.toggle-btn');
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   detectCMS();
+  detectLoaderScript();
   setupToggleButtons();
   setupAnalyzeButton();
   setupCopyButton();
@@ -103,6 +105,44 @@ function detectCMSInPage() {
   if (document.querySelector('script[src*="tilda"]')) return 'Tilda';
   
   return 'Unknown';
+}
+
+async function detectLoaderScript() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: detectLoaderScriptInPage
+    });
+
+    const count = results[0]?.result || 0;
+    if (count > 1) {
+      scriptDisplay.textContent = 'ERROR: Multiple Scripts Found!';
+      scriptDisplay.classList.add('error');
+    } else if (count === 1) {
+      scriptDisplay.textContent = 'Script Found!';
+      scriptDisplay.classList.add('detected');
+    } else {
+      scriptDisplay.textContent = 'Script Not Found';
+    }
+  } catch (err) {
+    scriptDisplay.textContent = 'Unable to detect';
+    console.error('Loader script detection error:', err);
+  }
+}
+
+// Function injected into page for loader script detection
+function detectLoaderScriptInPage() {
+  const loaderScripts = document.querySelectorAll('[src="https://api.kwipped.com/approve/plugin/3.0/approve_plugin_loader.php"]');
+  if (loaderScripts.length > 0) {
+    return loaderScripts.length;
+  }
+
+  const newLoaderScripts = document.querySelectorAll('[src^="https://plugin.approvepayments.com/plugin/4.0/loader/"]');
+  if (newLoaderScripts.length > 0) {
+    return newLoaderScripts.length;
+  }
 }
 
 // Analyze button
