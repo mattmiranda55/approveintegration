@@ -143,6 +143,16 @@ function detectLoaderScriptInPage() {
   if (newLoaderScripts.length > 0) {
     return newLoaderScripts.length;
   }
+
+  const approve_plugin = document.querySelectorAll('approve-plugin');
+  if (approve_plugin.length > 0) {
+    return approve_plugin.length;
+  }
+  
+  const approve_widget = document.querySelectorAll('approve-widget');
+  if (approve_widget.length > 0) {
+    return approve_widget.length;
+  }
 }
 
 // Analyze button
